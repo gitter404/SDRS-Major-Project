@@ -1,0 +1,12 @@
+const r = require('express').Router(), rateLimit = require('express-rate-limit');
+const c = require('../controllers/incident'); const { protect, authorize } = require('../middleware/auth');
+const limiter = rateLimit({ windowMs: 60_000, max: 10, message: { success: false, message: 'Too many reports, slow down' } });
+r.use(protect);
+r.post('/', limiter, authorize('citizen', 'authority', 'volunteer'), c.create);
+r.get('/', authorize('authority'), c.list);
+r.get('/mine', c.mine);
+r.get('/stats', authorize('authority'), c.stats);
+r.get('/:id', c.getOne);
+r.patch('/:id/status', authorize('authority'), c.updateStatus);
+r.patch('/:id/assign', authorize('authority'), c.assign);
+module.exports = r;
